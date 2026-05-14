@@ -1,19 +1,29 @@
-// Configuration du Slider
+// --- Configuration & Variables ---
 const backgrounds = ['bg1.jpg', 'bg2.jpg', 'bg3.jpg', 'bg4.jpg'];
 let currentBg = 0;
+let totalFiles = 100;
+let filesRemaining = 100;
+let isPlaying = false;
 
+// --- Background Slider (Optimized with Preloading) ---
 function changeBackground() {
     const bgContainer = document.getElementById('background-container');
     currentBg = (currentBg + 1) % backgrounds.length;
     
-    bgContainer.style.opacity = '0';
-    setTimeout(() => {
-        bgContainer.style.backgroundImage = `url('${backgrounds[currentBg]}')`;
-        bgContainer.style.opacity = '1';
-    }, 1000);
+    // Créer une image temporaire pour précharger
+    const imgPreload = new Image();
+    imgPreload.src = backgrounds[currentBg];
+    
+    imgPreload.onload = () => {
+        bgContainer.style.opacity = '0';
+        setTimeout(() => {
+            bgContainer.style.backgroundImage = `url('${backgrounds[currentBg]}')`;
+            bgContainer.style.opacity = '1';
+        }, 800);
+    };
 }
 
-setInterval(changeBackground, 7000);
+setInterval(changeBackground, 8000);
 
 // --- Real-Time Clock ---
 function updateClock() {
@@ -30,7 +40,6 @@ updateClock();
 const audio = document.getElementById('bg-music');
 const musicBtn = document.getElementById('music-btn');
 const musicText = document.getElementById('music-text');
-let isPlaying = false;
 
 function toggleMusic() {
     if (isPlaying) {
@@ -56,17 +65,19 @@ function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemo
     if (steamid) {
         document.getElementById('player-steamid').innerText = steamid;
         
-        // Tentative de récupération du pseudo et de l'avatar
-        // On utilise un proxy public pour éviter les erreurs de sécurité (CORS)
         fetch(`https://api.v-rp.fr/steam.php?steamid=${steamid}`)
             .then(res => res.json())
             .then(data => {
-                if (data.name) document.getElementById('player-name').innerText = data.name.toUpperCase();
-                if (data.avatar) document.getElementById('player-avatar').src = data.avatar;
+                if (data.name) {
+                    const name = data.name.toUpperCase();
+                    document.getElementById('player-name').innerText = name;
+                }
+                if (data.avatar && data.avatar !== "") {
+                    document.getElementById('player-avatar').src = data.avatar;
+                }
             })
             .catch(() => {
-                // Fallback si l'API est offline
-                document.getElementById('player-name').innerText = "JOUEUR";
+                document.getElementById('player-name').innerText = "SURVIVANT";
             });
     }
 }
@@ -75,32 +86,39 @@ function SetStatusChanged(status) {
     document.getElementById('loading-status').innerText = status;
 }
 
-function SetFilesNeeded(needed) { totalFiles = Math.max(1, needed); refreshProgress(); }
-function SetFilesRemaining(remaining) { filesRemaining = remaining; refreshProgress(); }
-function DownloadingFile(fileName) { document.getElementById('current-file').innerText = "Téléchargement : " + fileName; }
+function SetFilesNeeded(needed) { 
+    totalFiles = Math.max(1, needed); 
+    refreshProgress(); 
+}
 
-let totalFiles = 100;
-let filesRemaining = 100;
+function SetFilesRemaining(remaining) { 
+    filesRemaining = Math.max(0, remaining); 
+    refreshProgress(); 
+}
+
+function DownloadingFile(fileName) { 
+    document.getElementById('current-file').innerText = "Téléchargement : " + fileName; 
+}
 
 function refreshProgress() {
     let progress = Math.floor(((totalFiles - filesRemaining) / totalFiles) * 100);
-    if (isNaN(progress)) progress = 0;
-    if (progress > 100) progress = 100;
+    progress = Math.max(0, Math.min(100, progress));
+    
     document.getElementById('progress-bar').style.width = progress + "%";
     document.getElementById('percentage').innerText = progress + "%";
 }
 
 function SetPlayerName(name) {
-    document.getElementById('player-name').innerText = name.toUpperCase();
+    if (name) document.getElementById('player-name').innerText = name.toUpperCase();
 }
 
 // Simulation pour le test navigateur
 if (!window.gmod && !navigator.userAgent.includes("GMod")) {
     let simProgress = 0;
     setInterval(() => {
-        if (simProgress < 100) simProgress += 0.5;
+        if (simProgress < 100) simProgress += 0.2;
         SetFilesNeeded(100);
         SetFilesRemaining(100 - simProgress);
     }, 100);
-    SetPlayerName("Joueur Démo");
+    setTimeout(() => SetPlayerName("Joueur Démo"), 1000);
 }
