@@ -52,8 +52,22 @@ document.body.addEventListener('click', () => {
 // --- GMod Loading Screen API ---
 function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
     document.getElementById('server-name').innerText = servername || "VITRUM ROLEPLAY";
+    
     if (steamid) {
         document.getElementById('player-steamid').innerText = steamid;
+        
+        // Tentative de récupération du pseudo et de l'avatar
+        // On utilise un proxy public pour éviter les erreurs de sécurité (CORS)
+        fetch(`https://api.v-rp.fr/steam.php?steamid=${steamid}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.name) document.getElementById('player-name').innerText = data.name.toUpperCase();
+                if (data.avatar) document.getElementById('player-avatar').src = data.avatar;
+            })
+            .catch(() => {
+                // Fallback si l'API est offline
+                document.getElementById('player-name').innerText = "JOUEUR";
+            });
     }
 }
 
