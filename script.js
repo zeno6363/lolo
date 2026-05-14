@@ -1,8 +1,8 @@
 // --- Configuration & Variables ---
 const backgrounds = ['bg1.jpg', 'bg2.jpg', 'bg3.jpg', 'bg4.jpg'];
 let currentBg = 0;
-let totalFiles = 100;
-let filesRemaining = 100;
+let totalFiles = 0; 
+let filesRemaining = 0;
 let isPlaying = false;
 
 // --- Background Slider (Optimized with Preloading) ---
@@ -10,7 +10,6 @@ function changeBackground() {
     const bgContainer = document.getElementById('background-container');
     currentBg = (currentBg + 1) % backgrounds.length;
     
-    // Créer une image temporaire pour précharger
     const imgPreload = new Image();
     imgPreload.src = backgrounds[currentBg];
     
@@ -65,15 +64,15 @@ function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemo
     if (steamid) {
         document.getElementById('player-steamid').innerText = steamid;
         
+        // Nouvelle tentative pour l'avatar avec une API plus stable
+        const avatarImg = document.getElementById('player-avatar');
+        avatarImg.src = `https://www.steamid.xyz/api/avatar/${steamid}`;
+
         fetch(`https://api.v-rp.fr/steam.php?steamid=${steamid}`)
             .then(res => res.json())
             .then(data => {
                 if (data.name) {
-                    const name = data.name.toUpperCase();
-                    document.getElementById('player-name').innerText = name;
-                }
-                if (data.avatar && data.avatar !== "") {
-                    document.getElementById('player-avatar').src = data.avatar;
+                    document.getElementById('player-name').innerText = data.name.toUpperCase();
                 }
             })
             .catch(() => {
@@ -87,12 +86,16 @@ function SetStatusChanged(status) {
 }
 
 function SetFilesNeeded(needed) { 
-    totalFiles = Math.max(1, needed); 
+    totalFiles = Math.max(totalFiles, needed); 
     refreshProgress(); 
 }
 
 function SetFilesRemaining(remaining) { 
     filesRemaining = Math.max(0, remaining); 
+    // Ajustement dynamique du total pour éviter les pourcentages négatifs
+    if (filesRemaining > totalFiles) {
+        totalFiles = filesRemaining;
+    }
     refreshProgress(); 
 }
 
@@ -101,7 +104,10 @@ function DownloadingFile(fileName) {
 }
 
 function refreshProgress() {
-    let progress = Math.floor(((totalFiles - filesRemaining) / totalFiles) * 100);
+    if (totalFiles <= 0) return;
+    let progress = Math.round(((totalFiles - filesRemaining) / totalFiles) * 100);
+    
+    // Sécurité absolue entre 0 et 100
     progress = Math.max(0, Math.min(100, progress));
     
     document.getElementById('progress-bar').style.width = progress + "%";
@@ -120,5 +126,4 @@ if (!window.gmod && !navigator.userAgent.includes("GMod")) {
         SetFilesNeeded(100);
         SetFilesRemaining(100 - simProgress);
     }, 100);
-    setTimeout(() => SetPlayerName("Joueur Démo"), 1000);
 }
