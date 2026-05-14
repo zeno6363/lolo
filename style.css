@@ -84,57 +84,6 @@ body {
     backdrop-filter: blur(10px);
 }
 
-/* --- Player Card --- */
-.player-card {
-    position: absolute;
-    bottom: 30px;
-    left: 25px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 12px 25px;
-    border-radius: 15px;
-    animation: fadeInUp 1s ease-out;
-    z-index: 100;
-}
-
-#player-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    border: 2px solid var(--primary);
-    box-shadow: 0 0 15px rgba(255, 140, 0, 0.2);
-    background: #111;
-    object-fit: cover;
-}
-
-.player-welcome {
-    display: flex;
-    flex-direction: column;
-}
-
-.welcome-text {
-    font-size: 0.55rem;
-    font-weight: 800;
-    letter-spacing: 2px;
-    color: var(--text-muted);
-}
-
-.player-name {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: var(--accent);
-    letter-spacing: 1px;
-    line-height: 1.1;
-}
-
-.player-id {
-    font-size: 0.65rem;
-    font-weight: 400;
-    color: var(--text-muted);
-    opacity: 0.8;
-}
-
 #background-container {
     position: fixed;
     top: 0;

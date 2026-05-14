@@ -60,25 +60,6 @@ document.body.addEventListener('click', () => {
 // --- GMod Loading Screen API ---
 function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
     document.getElementById('server-name').innerText = servername || "VITRUM ROLEPLAY";
-    
-    if (steamid) {
-        document.getElementById('player-steamid').innerText = steamid;
-        
-        // Nouvelle tentative pour l'avatar avec une API plus stable
-        const avatarImg = document.getElementById('player-avatar');
-        avatarImg.src = `https://www.steamid.xyz/api/avatar/${steamid}`;
-
-        fetch(`https://api.v-rp.fr/steam.php?steamid=${steamid}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.name) {
-                    document.getElementById('player-name').innerText = data.name.toUpperCase();
-                }
-            })
-            .catch(() => {
-                document.getElementById('player-name').innerText = "SURVIVANT";
-            });
-    }
 }
 
 function SetStatusChanged(status) {
